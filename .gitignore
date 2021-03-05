@@ -1,0 +1,7 @@
+*.class
+*.log
+target
+.metals
+.bloop
+.bsp
+metals.sbt
