@@ -60,9 +60,10 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
 
 lazy val tests = crossProject(JSPlatform, JVMPlatform)
   .enablePlugins(NoPublishPlugin)
-  .dependsOn(core % "test->test")
+  .dependsOn(core)
   .settings(
     name := "tests",
+    scalacOptions := scalacOptions.value.filterNot(_ == "-source:3.0-migration"),
     Compile / unmanagedSourceDirectories ++= {
       val major = if (isDotty.value) "-3" else "-2"
       List(CrossType.Pure, CrossType.Full).flatMap(
