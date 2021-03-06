@@ -16,8 +16,6 @@
 
 package org.typelevel.literally.examples
 
-import org.typelevel.literally.Literally
-
 opaque type ShortString = String
 
 object ShortString:
@@ -26,9 +24,4 @@ object ShortString:
   def fromString(value: String): Option[ShortString] =
     if value.length > MaxLength then None else Some(value)
 
-  object Literal extends Literally[ShortString]:
-    def validate(s: String): Option[String] =
-      if s.length > MaxLength then None 
-      else Some(s"ShortString must be <= ${ShortString.MaxLength} characters")
-
-    def build(s: String)(using Quotes) = Expr(s)
+  def unsafeFromString(value: String): ShortString = value

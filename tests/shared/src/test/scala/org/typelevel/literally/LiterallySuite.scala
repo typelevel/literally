@@ -27,7 +27,18 @@ class LiterallySuite extends FunSuite {
     assertEquals(short"asdf", ShortString.fromString("asdf").get)
   }
 
-  test("short string prevents long construction") {
+  test("short string literal prevents invalid construction") {
     compileErrors("""short"asdfasdfasdf"""")
   }
+
+  test("port construction") {
+    assertEquals(port"8080", Port.fromInt(8080).get)
+  }
+
+  test("port literal prevents invalid construction") {
+    compileErrors("""port"asdf"""")
+    compileErrors("""port"-1"""")
+    compileErrors("""port"100000"""")
+  }
+
 }

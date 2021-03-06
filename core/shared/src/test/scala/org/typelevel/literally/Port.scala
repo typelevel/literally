@@ -16,14 +16,11 @@
 
 package org.typelevel.literally.examples
 
-case class ShortString private (value: String)
+case class Port private (value: Int)
+object Port {
+  val MinValue = 0
+  val MaxValue = 65535
 
-object ShortString {
-  val MaxLength = 10
-
-  def fromString(value: String): Option[ShortString] =
-    if (value.length > MaxLength) None else Some(new ShortString(value))
-
-  def unsafeFromString(value: String): ShortString =
-    new ShortString(value)
+  def fromInt(i: Int): Option[Port] =
+    if (i < MinValue || i > MaxValue) None else Some(new Port(i))
 }

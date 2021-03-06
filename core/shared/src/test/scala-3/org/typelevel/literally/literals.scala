@@ -16,6 +16,32 @@
 
 package org.typelevel.literally.examples
 
+import scala.util.Try
+import org.typelevel.literally.Literally
+
 object literals:      
-  extension (inline ctx: StringContext) inline def short(inline args: Any*): ShortString =
-    ${ShortString.Literal('ctx, 'args)}
+  extension (inline ctx: StringContext)
+    inline def short(inline args: Any*): ShortString =
+      ${ShortStringLiteral('ctx, 'args)}
+
+    inline def port(inline args: Any*): Port =
+      ${PortLiteral('ctx, 'args)}
+
+  object ShortStringLiteral extends Literally[ShortString]:
+    def validate(s: String): Option[String] =
+      if s.length > ShortString.MaxLength then None 
+      else Some(s"ShortString must be <= ${ShortString.MaxLength} characters")
+
+    def build(s: String)(using Quotes) =
+      '{ShortString.unsafeFromString(${Expr(s)})}
+
+  object PortLiteral extends Literally[Port]:
+    def validate(s: String): Option[String] =
+      Try(s.toInt).toOption.flatMap { i => 
+        Port.fromInt(i) match
+          case None => Some(s"invalid port - must be integer between ${Port.MinValue} and ${Port.MaxValue}")
+          case Some(_) => None
+      }
+
+    def build(s: String)(using Quotes) =
+      '{Port.fromInt(${Expr(s)}.toInt).get}
