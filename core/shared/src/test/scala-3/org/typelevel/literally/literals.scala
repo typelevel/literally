@@ -29,7 +29,7 @@ object literals:
 
   object ShortStringLiteral extends Literally[ShortString]:
     def validate(s: String): Option[String] =
-      if s.length > ShortString.MaxLength then None 
+      if s.length <= ShortString.MaxLength then None 
       else Some(s"ShortString must be <= ${ShortString.MaxLength} characters")
 
     def build(s: String)(using Quotes) =
@@ -37,11 +37,9 @@ object literals:
 
   object PortLiteral extends Literally[Port]:
     def validate(s: String): Option[String] =
-      Try(s.toInt).toOption.flatMap { i => 
-        Port.fromInt(i) match
-          case None => Some(s"invalid port - must be integer between ${Port.MinValue} and ${Port.MaxValue}")
-          case Some(_) => None
-      }
+      Try(s.toInt).toOption.flatMap(Port.fromInt) match
+        case None => Some(s"invalid port - must be integer between ${Port.MinValue} and ${Port.MaxValue}")
+        case Some(_) => None
 
     def build(s: String)(using Quotes) =
       '{Port.fromInt(${Expr(s)}.toInt).get}

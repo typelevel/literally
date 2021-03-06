@@ -20,8 +20,8 @@ import munit.FunSuite
 
 class LiterallySuite extends FunSuite {
 
-  import org.typelevel.literally.examples.ShortString
-  import org.typelevel.literally.examples.literals.short
+  import org.typelevel.literally.examples.{ShortString, Port}
+  import org.typelevel.literally.examples.literals._
 
   test("short string construction") {
     assertEquals(short"asdf", ShortString.fromString("asdf").get)
@@ -36,9 +36,8 @@ class LiterallySuite extends FunSuite {
   }
 
   test("port literal prevents invalid construction") {
-    compileErrors("""port"asdf"""")
-    compileErrors("""port"-1"""")
-    compileErrors("""port"100000"""")
+    assert(compileErrors("""port"asdf"""").nonEmpty)
+    assert(compileErrors("""port"-1"""").nonEmpty)
+    assert(compileErrors("""port"100000"""").nonEmpty)
   }
-
 }

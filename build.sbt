@@ -31,7 +31,7 @@ ThisBuild / testFrameworks += new TestFramework("munit.Framework")
 
 lazy val root = project
   .in(file("."))
-  .aggregate(core.jvm, core.js)
+  .aggregate(core.jvm, core.js, tests.jvm, tests.js)
   .enablePlugins(NoPublishPlugin, SonatypeCiReleasePlugin)
 
 lazy val core = crossProject(JSPlatform, JVMPlatform)
