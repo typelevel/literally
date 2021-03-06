@@ -36,14 +36,7 @@ lazy val root = project
 
 lazy val core = crossProject(JSPlatform, JVMPlatform)
   .settings(
-    name := "literally"
-  )
-  .settings(dottyJsSettings(ThisBuild / crossScalaVersions))
-  .settings(
-    libraryDependencies += "org.scalameta" %%% "munit" % "0.7.22" % Test,
-    libraryDependencies ++= {
-      if (isDotty.value) Nil else List("org.scala-lang" % "scala-reflect" % scalaVersion.value % "provided")
-    },
+    name := "literally",
     scalacOptions := scalacOptions.value.filterNot(_ == "-source:3.0-migration"),
     Compile / unmanagedSourceDirectories ++= {
       val major = if (isDotty.value) "-3" else "-2"
@@ -58,24 +51,18 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
       )
     }
   )
-  .jsSettings(
-    scalaJSLinkerConfig ~= (_.withModuleKind(ModuleKind.CommonJSModule))
+  .settings(dottyJsSettings(ThisBuild / crossScalaVersions))
+  .settings(
+    libraryDependencies ++= {
+      if (isDotty.value) Nil else List("org.scala-lang" % "scala-reflect" % scalaVersion.value % "provided")
+    }
   )
-
 
 lazy val tests = crossProject(JSPlatform, JVMPlatform)
   .enablePlugins(NoPublishPlugin)
   .dependsOn(core % "test->test")
   .settings(
-    name := "tests"
-  )
-  .settings(dottyJsSettings(ThisBuild / crossScalaVersions))
-  .settings(
-    libraryDependencies += "org.scalameta" %%% "munit" % "0.7.22" % Test,
-    libraryDependencies ++= {
-      if (isDotty.value) Nil else List("org.scala-lang" % "scala-reflect" % scalaVersion.value % "provided")
-    },
-    scalacOptions := scalacOptions.value.filterNot(_ == "-source:3.0-migration"),
+    name := "tests",
     Compile / unmanagedSourceDirectories ++= {
       val major = if (isDotty.value) "-3" else "-2"
       List(CrossType.Pure, CrossType.Full).flatMap(
@@ -87,9 +74,13 @@ lazy val tests = crossProject(JSPlatform, JVMPlatform)
       List(CrossType.Pure, CrossType.Full).flatMap(
         _.sharedSrcDir(baseDirectory.value, "test").toList.map(f => file(f.getPath + major))
       )
-    }
+    },
+    githubWorkflowArtifactUpload := false
+  )
+  .settings(dottyJsSettings(ThisBuild / crossScalaVersions))
+  .settings(
+    libraryDependencies += "org.scalameta" %%% "munit" % "0.7.22" % Test
   )
   .jsSettings(
     scalaJSLinkerConfig ~= (_.withModuleKind(ModuleKind.CommonJSModule))
   )
-
