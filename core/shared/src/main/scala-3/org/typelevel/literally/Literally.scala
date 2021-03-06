@@ -19,6 +19,10 @@ package org.typelevel.literally
 import scala.quoted._
 
 trait Literally[A]:
+  type Quotes = scala.quoted.Quotes
+  type Expr[A] = scala.quoted.Expr[A]
+  val Expr = scala.quoted.Expr
+
   def validate(s: String): Option[String]
   def build(s: String)(using Quotes): Expr[A]
 

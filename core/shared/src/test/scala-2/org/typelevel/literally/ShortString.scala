@@ -16,7 +16,6 @@
 
 package org.typelevel.literally.examples
 
-import scala.reflect.macros.blackbox.Context
 import org.typelevel.literally.Literally
 
 case class ShortString private (value: String)
@@ -25,15 +24,15 @@ object ShortString {
   val MaxLength = 10
 
   def fromString(value: String): Option[ShortString] =
-    if (value.length > 10) None else Some(new ShortString(value))
+    if (value.length > MaxLength) None else Some(new ShortString(value))
 
   def unsafeFromString(value: String): ShortString =
     new ShortString(value)
 
   object Literal extends Literally[ShortString] {
     def validate(s: String): Option[String] =
-      if (ShortString.fromString(s).isDefined) None 
-      else Some(s"ShortString must be <= ${ShortString.MaxLength}")
+      if (s.length > MaxLength) None 
+      else Some(s"ShortString must be <= ${ShortString.MaxLength} characters")
 
     def build(c: Context)(s: c.Expr[String]) = 
       c.universe.reify { ShortString.unsafeFromString(s.splice) }

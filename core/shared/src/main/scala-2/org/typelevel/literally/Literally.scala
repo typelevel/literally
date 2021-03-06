@@ -16,9 +16,9 @@
 
 package org.typelevel.literally
 
-import scala.reflect.macros.blackbox.Context
-
 trait Literally[A] {
+  type Context = scala.reflect.macros.blackbox.Context
+
   def validate(s: String): Option[String]
   def build(c: Context)(s: c.Expr[String]): c.Expr[A]
 

@@ -16,7 +16,6 @@
 
 package org.typelevel.literally.examples
 
-import scala.quoted.{Expr, Quotes}
 import org.typelevel.literally.Literally
 
 opaque type ShortString = String
@@ -25,11 +24,11 @@ object ShortString:
   val MaxLength = 10
 
   def fromString(value: String): Option[ShortString] =
-    if value.length > 10 then None else Some(value)
+    if value.length > MaxLength then None else Some(value)
 
   object Literal extends Literally[ShortString]:
     def validate(s: String): Option[String] =
-      if ShortString.fromString(s).isDefined then None 
-      else Some(s"ShortString must be <= ${ShortString.MaxLength}")
+      if s.length > MaxLength then None 
+      else Some(s"ShortString must be <= ${ShortString.MaxLength} characters")
 
     def build(s: String)(using Quotes) = Expr(s)
