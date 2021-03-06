@@ -16,24 +16,28 @@
 
 package org.typelevel.literally.examples
 
-import scala.quoted.{Expr, Quotes}
+import scala.reflect.macros.blackbox.Context
 import org.typelevel.literally.Literally
 
-trait ShortString
+case class ShortString private (value: String)
 
-object ShortString:
+object ShortString {
   val MaxLength = 10
 
   def fromString(value: String): Option[ShortString] =
-    if value.length > 10 then None else Some(new ShortString { override def toString = value })
+    if (value.length > 10) None else Some(new ShortString(value))
 
-  object LiterallyInstance extends Literally[ShortString]:
+  def unsafeFromString(value: String): ShortString =
+    new ShortString(value)
+
+  object Literal extends Literally[ShortString] {
     def validate(s: String): Option[String] =
-      if ShortString.fromString(s).isDefined then None 
+      if (ShortString.fromString(s).isDefined) None 
       else Some(s"ShortString must be <= ${ShortString.MaxLength}")
 
-    def build(s: String)(using Quotes) =
-      '{ShortString.fromString(${Expr(s)}).get}
+    def build(c: Context)(s: c.Expr[String]) = 
+      c.universe.reify { ShortString.unsafeFromString(s.splice) }
 
-extension (inline ctx: StringContext) inline def short(inline args: Any*): ShortString =
-  ${ShortString.LiterallyInstance.impl('ctx, 'args)}
+    def make(c: Context)(args: c.Expr[Any]*): c.Expr[ShortString] = apply(c)(args: _*)
+  }
+}

@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-package org.typelevel.literally
+package org.typelevel.literally.examples
 
-import munit.FunSuite
-
-class LiterallySuite extends FunSuite
+object literals {
+  implicit class short(val sc: StringContext) extends AnyVal {
+    def short(args: Any*): ShortString = macro ShortString.Literal.make
+  }
+}

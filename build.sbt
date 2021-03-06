@@ -10,7 +10,7 @@ ThisBuild / publishGithubUser := "mpilquist"
 ThisBuild / publishFullName := "Michael Pilquist"
 
 // ThisBuild / crossScalaVersions := List("3.0.0-M3", "3.0.0-RC1", "2.12.13", "2.13.5")
-ThisBuild / crossScalaVersions := List("3.0.0-RC1")
+ThisBuild / crossScalaVersions := List("2.12.13", "2.13.5", "3.0.0-M3", "3.0.0-RC1")
 
 ThisBuild / spiewakCiReleaseSnapshots := true
 
@@ -41,6 +41,40 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
   .settings(dottyJsSettings(ThisBuild / crossScalaVersions))
   .settings(
     libraryDependencies += "org.scalameta" %%% "munit" % "0.7.22" % Test,
+    libraryDependencies ++= {
+      if (isDotty.value) Nil else List("org.scala-lang" % "scala-reflect" % scalaVersion.value % "provided")
+    },
+    scalacOptions := scalacOptions.value.filterNot(_ == "-source:3.0-migration"),
+    Compile / unmanagedSourceDirectories ++= {
+      val major = if (isDotty.value) "-3" else "-2"
+      List(CrossType.Pure, CrossType.Full).flatMap(
+        _.sharedSrcDir(baseDirectory.value, "main").toList.map(f => file(f.getPath + major))
+      )
+    },
+    Test / unmanagedSourceDirectories ++= {
+      val major = if (isDotty.value) "-3" else "-2"
+      List(CrossType.Pure, CrossType.Full).flatMap(
+        _.sharedSrcDir(baseDirectory.value, "test").toList.map(f => file(f.getPath + major))
+      )
+    }
+  )
+  .jsSettings(
+    scalaJSLinkerConfig ~= (_.withModuleKind(ModuleKind.CommonJSModule))
+  )
+
+
+lazy val tests = crossProject(JSPlatform, JVMPlatform)
+  .enablePlugins(NoPublishPlugin)
+  .dependsOn(core % "test->test")
+  .settings(
+    name := "tests"
+  )
+  .settings(dottyJsSettings(ThisBuild / crossScalaVersions))
+  .settings(
+    libraryDependencies += "org.scalameta" %%% "munit" % "0.7.22" % Test,
+    libraryDependencies ++= {
+      if (isDotty.value) Nil else List("org.scala-lang" % "scala-reflect" % scalaVersion.value % "provided")
+    },
     scalacOptions := scalacOptions.value.filterNot(_ == "-source:3.0-migration"),
     Compile / unmanagedSourceDirectories ++= {
       val major = if (isDotty.value) "-3" else "-2"

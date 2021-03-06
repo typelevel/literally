@@ -16,20 +16,20 @@
 
 package org.typelevel.literally
 
-import scala.quoted.*
+import scala.quoted._
 
 trait Literally[A]:
   def validate(s: String): Option[String]
   def build(s: String)(using Quotes): Expr[A]
 
-  def impl(strCtxExpr: Expr[StringContext], argsExpr: Expr[Seq[Any]])(using Quotes): Expr[A] =
+  def apply(strCtxExpr: Expr[StringContext], argsExpr: Expr[Seq[Any]])(using Quotes): Expr[A] =
     strCtxExpr.value match
-      case Some(sc) => impl2(sc.parts, argsExpr)
+      case Some(sc) => apply(sc.parts, argsExpr)
       case None =>
         quotes.reflect.report.error("StringContext args must be statically known")
         ???
 
-  def impl2(parts: Seq[String], argsExpr: Expr[Seq[Any]])(using Quotes): Expr[A] =
+  private def apply(parts: Seq[String], argsExpr: Expr[Seq[Any]])(using Quotes): Expr[A] =
     if parts.size == 1 then
       val literal = parts.head
       validate(literal) match
