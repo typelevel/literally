@@ -35,7 +35,6 @@ Defining a custom string literal for a type `A` involves:
 - Defining an extension method on a `StringContext` which uses the defined `Literally[A]` instance
 
 ```scala
-import scala.util.Try
 import org.typelevel.literally.Literally
 
 object literals:      
