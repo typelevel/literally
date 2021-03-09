@@ -26,25 +26,23 @@ object literals {
   }
 
   object ShortStringLiteral extends Literally[ShortString] {
-    def validate(s: String): Option[String] =
-      if (s.length <= ShortString.MaxLength) None 
-      else Some(s"ShortString must be <= ${ShortString.MaxLength} characters")
-
-    def build(c: Context)(s: c.Expr[String]) = 
-      c.universe.reify { ShortString.unsafeFromString(s.splice) }
+    def validate(c: Context)(s: String) = {
+      import c.universe._
+      if (s.length <= ShortString.MaxLength) Right(c.Expr(q"ShortString.unsafeFromString($s)")) 
+      else Left(s"ShortString must be <= ${ShortString.MaxLength} characters")
+    }
 
     def make(c: Context)(args: c.Expr[Any]*): c.Expr[ShortString] = apply(c)(args: _*)
   }
 
   object PortLiteral extends Literally[Port] {
-    def validate(s: String): Option[String] =
+    def validate(c: Context)(s: String): Either[String, c.Expr[Port]] = {
+      import c.universe.{Try => _, _}
       Try(s.toInt).toOption.flatMap(Port.fromInt) match {
-        case None => Some(s"invalid port - must be integer between ${Port.MinValue} and ${Port.MaxValue}")
-        case Some(_) => None
+        case None => Left(s"invalid port - must be integer between ${Port.MinValue} and ${Port.MaxValue}")
+        case Some(_) => Right(c.Expr(q"Port.fromInt($s.toInt).get"))
       }
-
-    def build(c: Context)(s: c.Expr[String]) =
-      c.universe.reify { Port.fromInt(s.splice.toInt).get }
+    }
 
     def make(c: Context)(args: c.Expr[Any]*): c.Expr[Port] = apply(c)(args: _*)
   }

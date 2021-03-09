@@ -44,13 +44,10 @@ object literals:
       ${PortLiteral('ctx, 'args)}
 
   object PortLiteral extends Literally[Port]:
-    def validate(s: String): Option[String] =
-      Try(s.toInt).toOption.flatMap(Port.fromInt) match
-        case None => Some(s"invalid port - must be integer between ${Port.MinValue} and ${Port.MaxValue}")
-        case Some(_) => None
-
-    def build(s: String)(using Quotes) =
-      '{Port.fromInt(${Expr(s)}.toInt).get}
+    def validate(s: String)(using Quotes) =
+      s.toIntOption.flatMap(Port.fromInt) match
+        case None => Left(s"invalid port - must be integer between ${Port.MinValue} and ${Port.MaxValue}")
+        case Some(_) => Right('{Port.fromInt(${Expr(s)}.toInt).get})
 ```
 
 The same pattern is used for Scala 2, though the syntax for extension methods and macros are a bit different:
@@ -65,14 +62,13 @@ object literals {
   }
 
   object PortLiteral extends Literally[Port] {
-    def validate(s: String): Option[String] =
+    def validate(c: Context)(s: String): Either[String, c.Expr[Port]] = {
+      import c.universe.{Try => _, _}
       Try(s.toInt).toOption.flatMap(Port.fromInt) match {
-        case None => Some(s"invalid port - must be integer between ${Port.MinValue} and ${Port.MaxValue}")
-        case Some(_) => None
+        case None => Left(s"invalid port - must be integer between ${Port.MinValue} and ${Port.MaxValue}")
+        case Some(_) => Right(c.Expr(q"Port.fromInt($s.toInt).get"))
       }
-
-    def build(c: Context)(s: c.Expr[String]) =
-      c.universe.reify { Port.fromInt(s.splice.toInt).get }
+    }
 
     def make(c: Context)(args: c.Expr[Any]*): c.Expr[Port] = apply(c)(args: _*)
   }
