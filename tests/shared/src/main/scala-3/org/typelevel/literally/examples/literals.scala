@@ -16,7 +16,6 @@
 
 package org.typelevel.literally.examples
 
-import scala.util.Try
 import org.typelevel.literally.Literally
 
 object literals:      
@@ -34,6 +33,6 @@ object literals:
 
   object PortLiteral extends Literally[Port]:
     def validate(s: String)(using Quotes) =
-      Try(s.toInt).toOption.flatMap(Port.fromInt) match
+      s.toIntOption.flatMap(Port.fromInt) match
         case None => Left(s"invalid port - must be integer between ${Port.MinValue} and ${Port.MaxValue}")
         case Some(_) => Right('{Port.fromInt(${Expr(s)}.toInt).get})
