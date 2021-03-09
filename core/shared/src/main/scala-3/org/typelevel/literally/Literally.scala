@@ -23,24 +23,24 @@ trait Literally[A]:
   type Expr[A] = scala.quoted.Expr[A]
   val Expr = scala.quoted.Expr
 
-  def validate(s: String)(using Quotes): Either[String, Expr[String => A]]
+  def validate(s: String)(using Quotes): Either[String, Expr[A]]
 
-  def apply(strCtxExpr: Expr[StringContext], argsExpr: Expr[Seq[Any]])(using Quotes, Type[A]): Expr[A] =
+  def apply(strCtxExpr: Expr[StringContext], argsExpr: Expr[Seq[Any]])(using Quotes): Expr[A] =
     strCtxExpr.value match
       case Some(sc) => apply(sc.parts, argsExpr)
       case None =>
         quotes.reflect.report.error("StringContext args must be statically known")
         ???
 
-  private def apply(parts: Seq[String], argsExpr: Expr[Seq[Any]])(using Quotes, Type[A]): Expr[A] =
+  private def apply(parts: Seq[String], argsExpr: Expr[Seq[Any]])(using Quotes): Expr[A] =
     if parts.size == 1 then
       val literal = parts.head
       validate(literal) match
         case Left(err) =>
           quotes.reflect.report.error(err)
           ???
-        case Right(builder) =>
-          '{${builder}(${Expr(literal)})}
+        case Right(a) =>
+          a
     else
       quotes.reflect.report.error("interpolation not supported", argsExpr)
       ???
