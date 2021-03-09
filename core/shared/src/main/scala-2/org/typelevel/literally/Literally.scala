@@ -19,17 +19,16 @@ package org.typelevel.literally
 trait Literally[A] {
   type Context = scala.reflect.macros.blackbox.Context
 
-  def validate(s: String): Option[String]
-  def build(c: Context)(s: c.Expr[String]): c.Expr[A]
+  def validate(c: Context)(s: String): Either[String, c.Expr[A]]
 
   def apply(c: Context)(args: c.Expr[Any]*): c.Expr[A] = {
     import c.universe._
     identity(args)
     c.prefix.tree match {
-      case Apply(_, List(Apply(_, (lcp @ Literal(Constant(p: String))) :: Nil))) =>
-        validate(p) match {
-          case Some(msg) => c.abort(c.enclosingPosition, msg)
-          case None => this.build(c)(c.Expr(lcp))
+      case Apply(_, List(Apply(_, (Literal(Constant(p: String))) :: Nil))) =>
+        validate(c)(p) match {
+          case Left(msg) => c.abort(c.enclosingPosition, msg)
+          case Right(a) => a
         }
     }
   }
