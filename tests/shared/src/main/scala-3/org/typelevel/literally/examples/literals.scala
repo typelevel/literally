@@ -28,18 +28,12 @@ object literals:
       ${PortLiteral('ctx, 'args)}
 
   object ShortStringLiteral extends Literally[ShortString]:
-    def validate(s: String): Option[String] =
-      if s.length <= ShortString.MaxLength then None 
-      else Some(s"ShortString must be <= ${ShortString.MaxLength} characters")
-
-    def build(s: String)(using Quotes) =
-      '{ShortString.unsafeFromString(${Expr(s)})}
+    def validate(s: String)(using Quotes) =
+      if s.length <= ShortString.MaxLength then Right('{ShortString.unsafeFromString(_)}) 
+      else Left(s"ShortString must be <= ${ShortString.MaxLength} characters")
 
   object PortLiteral extends Literally[Port]:
-    def validate(s: String): Option[String] =
+    def validate(s: String)(using Quotes) =
       Try(s.toInt).toOption.flatMap(Port.fromInt) match
-        case None => Some(s"invalid port - must be integer between ${Port.MinValue} and ${Port.MaxValue}")
-        case Some(_) => None
-
-    def build(s: String)(using Quotes) =
-      '{Port.fromInt(${Expr(s)}.toInt).get}
+        case None => Left(s"invalid port - must be integer between ${Port.MinValue} and ${Port.MaxValue}")
+        case Some(_) => Right('{s => Port.fromInt(s.toInt).get})
