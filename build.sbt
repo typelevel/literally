@@ -9,7 +9,7 @@ ThisBuild / organizationName := "Typelevel"
 ThisBuild / publishGithubUser := "mpilquist"
 ThisBuild / publishFullName := "Michael Pilquist"
 
-ThisBuild / crossScalaVersions := List("2.12.13", "2.13.5", "3.0.0-RC2", "3.0.0-RC3")
+ThisBuild / crossScalaVersions := List("2.12.13", "2.13.5", "3.0.0")
 
 ThisBuild / spiewakCiReleaseSnapshots := true
 
@@ -79,7 +79,7 @@ lazy val tests = crossProject(JSPlatform, JVMPlatform)
   )
   .settings(dottyJsSettings(ThisBuild / crossScalaVersions))
   .settings(
-    libraryDependencies += "org.scalameta" %%% "munit" % "0.7.25" % Test,
+    libraryDependencies += "org.scalameta" %%% "munit" % "0.7.26" % Test,
     libraryDependencies ++= {
       if (isDotty.value) Nil else List("org.scala-lang" % "scala-reflect" % scalaVersion.value % "provided")
     }
