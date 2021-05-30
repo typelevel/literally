@@ -50,7 +50,6 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
       )
     }
   )
-  .settings(dottyJsSettings(ThisBuild / crossScalaVersions))
   .settings(
     libraryDependencies ++= {
       if (isDotty.value) Nil else List("org.scala-lang" % "scala-reflect" % scalaVersion.value % "provided")
@@ -77,7 +76,6 @@ lazy val tests = crossProject(JSPlatform, JVMPlatform)
     },
     githubWorkflowArtifactUpload := false
   )
-  .settings(dottyJsSettings(ThisBuild / crossScalaVersions))
   .settings(
     libraryDependencies += "org.scalameta" %%% "munit" % "0.7.26" % Test,
     libraryDependencies ++= {
