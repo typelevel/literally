@@ -77,7 +77,7 @@ lazy val tests = crossProject(JSPlatform, JVMPlatform)
     githubWorkflowArtifactUpload := false
   )
   .settings(
-    libraryDependencies += "org.scalameta" %%% "munit" % "0.7.26" % Test,
+    libraryDependencies += "org.scalameta" %%% "munit" % "0.7.27" % Test,
     libraryDependencies ++= {
       if (isDotty.value) Nil else List("org.scala-lang" % "scala-reflect" % scalaVersion.value % "provided")
     }
