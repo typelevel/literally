@@ -26,11 +26,7 @@ trait Literally[A]:
   def validate(s: String)(using Quotes): Either[String, Expr[A]]
 
   def apply(strCtxExpr: Expr[StringContext], argsExpr: Expr[Seq[Any]])(using Quotes): Expr[A] =
-    strCtxExpr.value match
-      case Some(sc) => apply(sc.parts, argsExpr)
-      case None =>
-        quotes.reflect.report.error("StringContext args must be statically known")
-        ???
+    apply(strCtxExpr.valueOrAbort.parts, argsExpr)
 
   private def apply(parts: Seq[String], argsExpr: Expr[Seq[Any]])(using Quotes): Expr[A] =
     if parts.size == 1 then
