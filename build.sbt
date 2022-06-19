@@ -1,4 +1,4 @@
-ThisBuild / tlBaseVersion := "1.0"
+ThisBuild / tlBaseVersion := "1.1"
 
 ThisBuild / developers += tlGitHubDev("mpilquist", "Michael Pilquist")
 ThisBuild / startYear := Some(2021)
@@ -8,7 +8,7 @@ ThisBuild / tlVersionIntroduced := Map("3" -> "1.0.2")
 
 lazy val root = tlCrossRootProject.aggregate(core, tests)
 
-lazy val core = crossProject(JSPlatform, JVMPlatform)
+lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .settings(
     name := "literally",
     scalacOptions := scalacOptions.value.filterNot(_ == "-source:3.0-migration"),
@@ -16,14 +16,17 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
       if (tlIsScala3.value) Nil else List("org.scala-lang" % "scala-reflect" % scalaVersion.value % Provided)
     }
   )
+  .nativeSettings(
+    tlVersionIntroduced := List("2.12", "2.13", "3").map(_ -> "1.1.0").toMap
+  )
 
-lazy val tests = crossProject(JSPlatform, JVMPlatform)
+lazy val tests = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .enablePlugins(NoPublishPlugin)
   .dependsOn(core)
   .settings(
     name := "tests",
     scalacOptions := scalacOptions.value.filterNot(_ == "-source:3.0-migration"),
-    libraryDependencies += "org.scalameta" %%% "munit" % "0.7.29" % Test,
+    libraryDependencies += "org.scalameta" %%% "munit" % "1.0.0-M5" % Test,
     libraryDependencies ++= {
       if (tlIsScala3.value) Nil else List("org.scala-lang" % "scala-reflect" % scalaVersion.value % Provided)
     }
