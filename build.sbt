@@ -3,7 +3,7 @@ ThisBuild / tlBaseVersion := "1.1"
 ThisBuild / developers += tlGitHubDev("mpilquist", "Michael Pilquist")
 ThisBuild / startYear := Some(2021)
 
-ThisBuild / crossScalaVersions := List("2.12.18", "2.13.10", "3.3.0")
+ThisBuild / crossScalaVersions := List("2.12.18", "2.13.11", "3.3.0")
 ThisBuild / tlVersionIntroduced := Map("3" -> "1.0.2")
 
 lazy val root = tlCrossRootProject.aggregate(core, tests)
