@@ -27,7 +27,7 @@ lazy val tests = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .settings(
     name := "tests",
     scalacOptions := scalacOptions.value.filterNot(_ == "-source:3.0-migration"),
-    libraryDependencies += "org.scalameta" %%% "munit" % "1.0.0-M8" % Test,
+    libraryDependencies += "org.scalameta" %%% "munit" % "1.0.0-M9" % Test,
     libraryDependencies ++= {
       if (tlIsScala3.value) Nil else List("org.scala-lang" % "scala-reflect" % scalaVersion.value % Provided)
     }
