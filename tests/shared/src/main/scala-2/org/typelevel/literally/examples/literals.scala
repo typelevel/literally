@@ -26,7 +26,7 @@ object literals {
   }
 
   object ShortStringLiteral extends Literally[ShortString] {
-    def validate(c: Context)(s: String) = {
+    def validate(c: Context)(s: String): Either[String, c.Expr[ShortString]] = {
       import c.universe._
       if (s.length <= ShortString.MaxLength) Right(c.Expr(q"ShortString.unsafeFromString($s)")) 
       else Left(s"ShortString must be <= ${ShortString.MaxLength} characters")
