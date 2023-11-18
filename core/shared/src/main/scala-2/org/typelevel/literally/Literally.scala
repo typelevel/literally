@@ -30,6 +30,7 @@ trait Literally[A] {
           case Left(msg) => c.abort(c.enclosingPosition, msg)
           case Right(a) => a
         }
+      case other => c.abort(c.enclosingPosition, "unsupported prefix: " + other)
     }
   }
 }
