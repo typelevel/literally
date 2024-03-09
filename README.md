@@ -2,6 +2,8 @@
 
 Compile time validation of literal values built from strings.
 
+### Rationale
+
 Consider a type like `Port`:
 
 ```scala
@@ -27,6 +29,14 @@ val q: Port = port"100000"
 ```
 
 Validation is performed at compile time. This library provides the macro implementations for both Scala 2 and Scala 3 which powers custom string literals.
+
+### Quick Start
+
+To get started with **literally** in an SBT project add the following dependency to your **build.sbt**:
+```
+libraryDependencies += "org.typelevel" %% "literally" % "<version>"
+```
+where `<version>` is the most recent version of **literally**.
 
 ### Usage
 
