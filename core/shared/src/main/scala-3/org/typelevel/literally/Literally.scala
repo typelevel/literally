@@ -28,15 +28,29 @@ trait Literally[A]:
   def apply(strCtxExpr: Expr[StringContext], argsExpr: Expr[Seq[Any]])(using Quotes): Expr[A] =
     apply(strCtxExpr.valueOrAbort.parts, argsExpr)
 
-  private def apply(parts: Seq[String], argsExpr: Expr[Seq[Any]])(using Quotes): Expr[A] =
-    if parts.size == 1 then
-      val literal = parts.head
-      validate(literal) match
-        case Left(err) =>
-          quotes.reflect.report.error(err)
-          ???
-        case Right(a) =>
-          a
-    else
-      quotes.reflect.report.error("interpolation not supported", argsExpr)
-      ???
+  private def apply(parts: Seq[String], argsExpr: Expr[Seq[Any]])(using q: Quotes): Expr[A] =
+    import q.reflect.*
+
+    val str = argsExpr.asTerm match
+      case Inlined(_, _, Typed(Repeated(terms, _), _)) =>
+        def termsAsStrings = terms.map { term =>
+          val staticVal = if (term.tpe <:< TypeRepr.of[String]) term.asExprOf[String].value
+            else if (term.tpe <:< TypeRepr.of[Int]) term.asExprOf[Int].value.map(_.toString)
+            else if (term.tpe <:< TypeRepr.of[Double]) term.asExprOf[Double].value.map(_.toString)
+            else if (term.tpe <:< TypeRepr.of[Float]) term.asExprOf[Float].value.map(_.toString)
+            else if (term.tpe <:< TypeRepr.of[Long]) term.asExprOf[Long].value.map(_.toString)
+            else if (term.tpe <:< TypeRepr.of[Short]) term.asExprOf[Short].value.map(_.toString)
+            else if (term.tpe <:< TypeRepr.of[Byte]) term.asExprOf[Byte].value.map(_.toString)
+            else if (term.tpe <:< TypeRepr.of[Char]) term.asExprOf[Char].value.map(_.toString)
+            else if (term.tpe <:< TypeRepr.of[Boolean]) term.asExprOf[Boolean].value.map(_.toString)
+            else if (term.tpe <:< TypeRepr.of[Unit]) Some("()")
+            else report.errorAndAbort(s"interpolated literal values must be primitive types", term.pos)
+          staticVal.getOrElse(report.errorAndAbort("interpolated values must be compile-time constants"))
+        }
+        parts.zipAll(termsAsStrings, "", "").map(_ + _).mkString
+      case unknown =>
+        report.errorAndAbort(s"unexpected error interpolating with literally, which didn't expect an interpolation tree in the form of $unknown", unknown.pos)
+
+    validate(str) match
+      case Left(err) => report.errorAndAbort(err)
+      case Right(value) => value

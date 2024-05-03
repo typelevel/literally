@@ -40,4 +40,27 @@ class LiterallySuite extends FunSuite {
     assert(compileErrors("""port"-1"""").nonEmpty)
     assert(compileErrors("""port"100000"""").nonEmpty)
   }
+
+  final val intOne = 1
+  final val stringTwo = "2"
+  final val doubleThree = 3.0
+  final val charFour = '4'
+
+  test("literal allows interpolation of primitive constants") {
+    assertEquals(port"1$stringTwo", Port.fromInt(12).get)
+    assertEquals(port"$intOne", Port.fromInt(1).get)
+    assertEquals(short"$doubleThree", ShortString.fromString("3.0").get)
+    assertEquals(port"1${stringTwo}3$charFour", Port.fromInt(1234).get)
+    assertEquals(port"${1}${"2"}${'3'}", Port.fromInt(123).get)
+  }
+
+  final val onetwo = (1, 2)
+  test("literal disallows interpolation of non-primivive constants") {
+    assert(clue(compileErrors("""port"$onetwo"""")).contains("interpolated literal values must be primitive types"))
+  }
+
+  test("literal disallows interpolation of non-constant values") {
+    assert(clue(compileErrors("""val aString = "1"; port"$aString"""")).contains("interpolated values need to be compile-time constants"))
+  }
+
 }
